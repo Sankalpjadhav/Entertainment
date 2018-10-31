@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <?php
+session_start();
+
    include 'db_connect.php';
    function Validate($data){
      $data= trim($data);
@@ -7,63 +9,94 @@
      $data=htmlspecialchars($data);
      return $data;
    }
-   session_start();
    $error='';
    $count=0;
    if (isset($_SESSION['login_user'])) {
-     header("Location:index.php");
+     header("Location:about.php");
    }
    if($_SERVER["REQUEST_METHOD"] == "POST")
    {
       // username and password sent from form
       $number = Validate($_POST['number']);
-      $password = md5($_POST['password']);
+      $password = $_POST['password'];
+      echo $number;
+      echo $password;
       if(isset($_POST['category']))
       {
         $category=$_POST['category'];
       }
-      if($category == 'comedian')
-      {
-        $sql = "SELECT *
-        FROM comediandb
-        WHERE buyerdb.bMobNo='$number' AND buyerdb.password='$password'";
-        $result = mysqli_query($connection,$sql);
-        $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
-        $active = $row['id'];
-        $count = mysqli_num_rows($result);
-        $_SESSION['genre']=$genre;
-        $_SESSION['fname']=$row['firstName'];
-        $_SESSION['lname']=$row['lastName'];
-        $_SESSION['mobile']=$row['bMobNo'];
-        $_SESSION['edu']=$row['education'];
-        $_SESSION['alterprof']=$row['alternateprof'];
-        if($count == 1)
-        {
-           $_SESSION['login_user'] = $number;
-           header("Location: index.php");
-        }
-      }
+      echo $category;
       if($category == 'audience')
       {
-        $sql = "SELECT *
-        FROM audiencedb
-        WHERE communorg.mbNo='$number' AND communorg.password='$password'";
+        $sql = "SELECT * FROM audiencedb  WHERE mbno='$number' AND password='$password'";
         $result = mysqli_query($connection,$sql);
-        $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
-        $active = $row['id'];
+        echo $sql;
         $count = mysqli_num_rows($result);
-        $_SESSION['interest']=$interest;
-        $_SESSION['fname']=$row['firstName'];
-        $_SESSION['lname']=$row['lastName'];
-        $_SESSION['mobile']=$row['mbNo'];
-        $_SESSION['mobile']=$row[''];
+        echo $count;
+        $row = mysqli_fetch_assoc($result);
+        $active = $row['aid'];
+
+        $_SESSION['aid']=$row['aid'];
+        $_SESSION['fname']=$row['fname'];
+        $_SESSION['lname']=$row['lname'];
+        $_SESSION['mobile']=$row['mbno'];
+        $_SESSION['email']=$row['email'];
+
+
+
         if($count == 1)
         {
-
            $_SESSION['login_user'] = $number;
-           header("Location: index.php");
+           header("Location: about.php");
         }
       }
+      if($category == 'comedian')
+      {
+        $sql = "SELECT * FROM comediandb  WHERE mobile='$number' AND password='$password'";
+        $result = mysqli_query($connection,$sql);
+        echo $sql;
+        $count = mysqli_num_rows($result);
+        echo $count;
+        $row = mysqli_fetch_assoc($result);
+        $active = $row['id'];
+
+        $_SESSION['id']=$row['id'];
+        $_SESSION['fname']=$row['firstName'];
+        $_SESSION['lname']=$row['lastName'];
+        $_SESSION['mobile']=$row['mobile'];
+        $_SESSION['email']=$row['email'];
+        $_SESSION['typeComedy']=$row['typeComedy'];
+
+
+        if($count == 1)
+        {
+           $_SESSION['login_user'] = $number;
+           header("Location: about.php");
+        }
+      }
+      /*if($category == 'comediandb')
+      {
+        $sql = "SELECT * FROM comediandb WHERE mobile='$number' AND password='$password'";
+
+        $result = mysqli_query($connection,$sql);
+        echo $sql;
+        $count = mysqli_num_rows($result);
+        echo $count;
+        $row = mysqli_fetch_assoc($result);
+        $active = $row['id'];
+
+
+        $_SESSION['fname']=$row['firstName'];
+        $_SESSION['lname']=$row['lastName'];
+        $_SESSION['mobile']=$row['mobile'];
+        $_SESSION['email']=$row['email'];
+        $_SESSION['typeComedy']=$row['typeComedy'];
+        if($count == 1)
+        {
+           $_SESSION['login_user'] = $number;
+           header("Location: about.php");
+        }
+      }*/
       if($count<=0)
       {
          $error = '<span style="color:red;text-align:center;">Your Login Name or Password is invalid';
@@ -90,7 +123,7 @@
 
     <div class="login-form col-sm-12 col-md-6 col-md-offset-4">
     <form  method="post" action="">
-     <h1 >Login</h1>
+     <h1>Login</h1>
      <div class="form-group ">
        <input type="number" name="number" class="form-control" aria-describedby="number" placeholder="Contact Number" id="number" required>
        <i class="fa fa-user"></i>
@@ -101,17 +134,13 @@
      </div>
      <div class="form-group" style="text-align:center;">
 
-       <!--<input type="radio" class="form-control"name="category" value="sellerdb" required>Farmer/Producer/Processor<br>
-       <b>Buyer/Consumer</b>
-       <input type="radio" class="form-control form-control-sm" name="category" value="buyerdb" required>
-       <b>Aggregator</b>
-       <input type="radio" class="form-control form-control-sm" name="category" value="aggregator"required >
-       <b>Community</b>
-       <input type="radio" class="form-control form-control-sm"name="category" value="communorg"required>
-       <b>Wellness Advisor</b>
-       <input type="radio" class="form-control form-control-sm" name="category" value="medexpertdb"required>-->
-       <!-- <small id="number" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
-       <select class="form-control" name="category">
+       <!--<input type="radio" class="form-control" name="category" value="comediandb" required>Comedy<br>
+
+       <input type="radio" class="form-control form-control-sm" name="category" value="audiencedb" required>Audience<br> -->
+
+
+     <small id="number" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        <select class="form-control" name="category">
           <option  value="comedian">COMEDIAN</option>
           <option  value="audience">AUDIENCE</option>
 
@@ -122,7 +151,7 @@
 
      <button type="submit" name="login" class="log-btn" >Log in</button>
      <p class="message">Forgot password? <a href="pwdreset.php">Enter new password</a></p>
-<p class="message">Not registered? <a href="signup2.php">Create an account</a></p>
+<p class="message">Not registered? <a href="sign1.php">Create an account</a></p>
 
 </form>
    </div>
